@@ -7,8 +7,21 @@ from flask import Flask, jsonify, request
 # importing generate_password_hash from werkzeug.security
 from werkzeug.security import generate_password_hash
 
+# importing psycopg2, the Python library for connecting to PostgreSQL databases
+import psycopg2  
+
 # creating an instance of the Flask class
 app = Flask(__name__)
+
+def get_connection():
+    # establishing a connection to the PostgreSQL database
+    return psycopg2.connect(
+        host="localhost",
+        port=5432,
+        dbname="usersdb",
+        user="shopuser",
+        password="shoppass"
+    )
 
 # defining a route for the root URL ("/") of the web application
 @app.route("/health", methods=["GET"])
@@ -27,7 +40,18 @@ def register_user():
     #hashing the password before storing it
     hashed_password = generate_password_hash(password)
 
-    return jsonify({"username": username, "email": email , "password": hashed_password}), 201
+    conn = get_connection()  # getting a connection to the database
+    cur = conn.cursor()  # creating a cursor to execute SQL commands
+    cur.execute(
+        "INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s) RETURNING id",
+        (username, email, hashed_password)
+    )
+    user_id = cur.fetchone()[0]  # getting the ID of the newly created user
+    conn.commit()  # committing the changes to the database
+    cur.close()  # closing the cursor
+    conn.close()  # closing the database connection
+
+    return jsonify({"id": user_id, "username": username, "email": email}), 201
 
 if __name__ == "__main__":
     # running the Flask application on host
