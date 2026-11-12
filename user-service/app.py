@@ -37,6 +37,12 @@ def register_user():
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
+
+    if not username or not email or not password:
+        # returning an error response if any of the required fields are missing
+        return jsonify({"error": "Missing required fields"}), 400
+
+
     #hashing the password before storing it
     hashed_password = generate_password_hash(password)
 
