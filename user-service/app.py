@@ -1,6 +1,8 @@
 # importing Flask and jsonify from the flask module
-# Flask is the tool we use to create our web application, and jsonify is used to convert Python dictionaries into JSON format for API responses.
-from flask import Flask, jsonify
+# Flask is the tool we use to create our web application
+# jsonify is used to convert Python dictionaries into JSON format for API responses
+# request is used to handle incoming HTTP requests in our Flask application
+from flask import Flask, jsonify, request
 
 # creating an instance of the Flask class
 app = Flask(__name__)
@@ -10,6 +12,16 @@ app = Flask(__name__)
 def health():
     # returning a JSON response indicating that the service is healthy
     return jsonify({"status": "healthy"})
+
+@app.route("/users/register", methods=["POST"])
+def register_user():
+    # getting the JSON data from the incoming request
+    data = request.get_json()
+    # extracting the user information from the JSON data
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+    return jsonify({"username": username, "email": email}), 201
 
 if __name__ == "__main__":
     # running the Flask application on host
