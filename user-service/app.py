@@ -4,6 +4,9 @@
 # request is used to handle incoming HTTP requests in our Flask application
 from flask import Flask, jsonify, request
 
+# importing generate_password_hash from werkzeug.security
+from werkzeug.security import generate_password_hash
+
 # creating an instance of the Flask class
 app = Flask(__name__)
 
@@ -21,7 +24,10 @@ def register_user():
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
-    return jsonify({"username": username, "email": email}), 201
+    #hashing the password before storing it
+    hashed_password = generate_password_hash(password)
+
+    return jsonify({"username": username, "email": email , "password": hashed_password}), 201
 
 if __name__ == "__main__":
     # running the Flask application on host
