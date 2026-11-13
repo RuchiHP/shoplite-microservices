@@ -49,13 +49,12 @@ services:
     networks: [shoplite-net]
 
   # Uncomment when Ruchi's product-service has a Dockerfile.
-  # Check her port number and change 5001 if needed.
   # product-service:
   #   build: ./product-service
   #   container_name: product-service
   #   environment:
   #     MONGO_URI: mongodb://${PRODUCTS_DB_USER}:${PRODUCTS_DB_PASSWORD}@products-db:27017/
-  #     MONGO_DB: ${PRODUCTS_DB_NAME}
+  #     MONGO_DB_NAME: ${PRODUCTS_DB_NAME}
   #     Port: 5001
   #   ports:
   #     - "5001:5001"
