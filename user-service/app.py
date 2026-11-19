@@ -4,8 +4,8 @@
 # request is used to handle incoming HTTP requests in our Flask application
 from flask import Flask, jsonify, request
 
-# importing generate_password_hash from werkzeug.security
-from werkzeug.security import generate_password_hash
+# importing generate_password_hash and check_password_hash from werkzeug.security
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # importing psycopg2, the Python library for connecting to PostgreSQL databases
 import psycopg2  
@@ -58,6 +58,30 @@ def register_user():
     conn.close()  # closing the database connection
 
     return jsonify({"id": user_id, "username": username, "email": email}), 201
+
+@app.route("/users/login", methods=["POST"])
+def login_user():
+    # getting the JSON data from the incoming request
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    # checking if both email and password are provided in the request
+    if not email or not password:
+        return jsonify({"error": "email and password are required"}), 400
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, username, password_hash FROM users WHERE email = %s", (email,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    # checking if the user exists and if the provided password matches the stored hashed password
+    if user is None or not check_password_hash(user[2], password):
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    return jsonify({"message": "login successful", "id": user[0], "username": user[1]}), 200
 
 if __name__ == "__main__":
     # running the Flask application on host
