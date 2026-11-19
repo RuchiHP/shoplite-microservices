@@ -17,7 +17,7 @@ def get_connection():
     # establishing a connection to the PostgreSQL database
     return psycopg2.connect(
         host="localhost",
-        port=5432,
+        port=5433,
         dbname="usersdb",
         user="shopuser",
         password="shoppass"
@@ -49,7 +49,7 @@ def register_user():
     conn = get_connection()  # getting a connection to the database
     cur = conn.cursor()  # creating a cursor to execute SQL commands
     cur.execute(
-        "INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s) RETURNING id",
+        "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s) RETURNING id",
         (username, email, hashed_password)
     )
     user_id = cur.fetchone()[0]  # getting the ID of the newly created user

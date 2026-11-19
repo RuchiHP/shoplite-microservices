@@ -1,4 +1,4 @@
-
+# import psycopg2, the Python library for connecting to PostgreSQL databases
 import psycopg2
 
 conn = psycopg2.connect(
