@@ -10,17 +10,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # importing psycopg2, the Python library for connecting to PostgreSQL databases
 import psycopg2  
 
+# importing the os module to access environment variables
+import os  
+
 # creating an instance of the Flask class
 app = Flask(__name__)
 
 def get_connection():
     # establishing a connection to the PostgreSQL database
     return psycopg2.connect(
-        host="localhost",
-        port=5433,
-        dbname="usersdb",
-        user="shopuser",
-        password="shoppass"
+        host=os.getenv("DB_HOST", "localhost"),
+        port=os.getenv("DB_PORT", 5433),
+        dbname=os.getenv("DB_NAME", "usersdb"),
+        user=os.getenv("DB_USER", "shopuser"),
+        password=os.getenv("DB_PASSWORD", "shoppass")
     )
 
 # defining a route for the root URL ("/") of the web application
