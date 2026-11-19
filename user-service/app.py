@@ -29,6 +29,7 @@ def health():
     # returning a JSON response indicating that the service is healthy
     return jsonify({"status": "healthy"})
 
+# defining a route for user registration
 @app.route("/users/register", methods=["POST"])
 def register_user():
     # getting the JSON data from the incoming request
@@ -59,6 +60,7 @@ def register_user():
 
     return jsonify({"id": user_id, "username": username, "email": email}), 201
 
+# defining a route for user login
 @app.route("/users/login", methods=["POST"])
 def login_user():
     # getting the JSON data from the incoming request
@@ -82,6 +84,24 @@ def login_user():
         return jsonify({"error": "Invalid email or password"}), 401
 
     return jsonify({"message": "login successful", "id": user[0], "username": user[1]}), 200
+
+# defining a route to get user details by user ID
+@app.route("/users/<int:user_id>", methods=["GET"])
+def get_user(user_id):
+   conn = get_connection()
+   cur = conn.cursor()
+   cur.execute(
+         "SELECT id, username, email, created_at FROM users WHERE id = %s", (user_id,)
+   )
+   user = cur.fetchone()
+   cur.close()
+   conn.close()
+
+   # checking if the user exists in the database; if not, returning a 404 error
+   if user is None:
+       return jsonify({"error": "User not found"}), 404
+
+   return jsonify({"id": user[0], "username": user[1], "email": user[2]}), 200
 
 if __name__ == "__main__":
     # running the Flask application on host
