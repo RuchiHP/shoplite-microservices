@@ -13,6 +13,9 @@ import psycopg2
 # importing the os module to access environment variables
 import os  
 
+# importing the errors module from psycopg2 to handle database errors
+from psycopg2 import errors
+
 # creating an instance of the Flask class
 app = Flask(__name__)
 
@@ -51,12 +54,22 @@ def register_user():
     hashed_password = generate_password_hash(password)
 
     conn = get_connection()  # getting a connection to the database
-    cur = conn.cursor()  # creating a cursor to execute SQL commands
-    cur.execute(
-        "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s) RETURNING id",
-        (username, email, hashed_password)
-    )
-    user_id = cur.fetchone()[0]  # getting the ID of the newly created user
+    cur = conn.cursor()  # creating a cursor object to execute SQL queries
+    try:
+        # executing an SQL query to insert the new user into the users table
+        cur.execute(
+            "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s) RETURNING id",
+            (username, email, hashed_password),
+        )
+        user_id = cur.fetchone()[0]  # fetching the ID of the newly created user
+        conn.commit()  # committing the changes to the database
+    except errors.UniqueViolation:
+        # returning an error response if the email is already registered
+        conn.rollback()  # rolling back the transaction in case of an error
+        cur.close()  # closing the cursor
+        conn.close()  # closing the database connection
+        return jsonify({"error": "Email already registered"}), 409
+
     conn.commit()  # committing the changes to the database
     cur.close()  # closing the cursor
     conn.close()  # closing the database connection
